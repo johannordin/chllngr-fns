@@ -1,13 +1,12 @@
-
-using System.IO;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Azure.WebJobs.Host;
 using Newtonsoft.Json;
+using System.IO;
 
-namespace chllngr.functions
+namespace chllngr.Functions
 {
     public class RequestModel
     {
@@ -17,15 +16,17 @@ namespace chllngr.functions
     {
         public string Greeting { get; set; }
     }
-    public static class Function1
+    public static class Greet
     {
-        [FunctionName("Function1")]
+        [FunctionName("Greet")]
         public static IActionResult Run([HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)]HttpRequest req, TraceWriter log)
         {
             string requestBody = new StreamReader(req.Body).ReadToEnd();
             var data = JsonConvert.DeserializeObject<RequestModel>(requestBody);
-            
-            return new JsonResult(new ResponseModel { Greeting = $"Hello, {data.Name}" });
+
+            var service = new GreetingService();
+
+            return new JsonResult(service.Greet(data.Name));
         }
     }
 }
